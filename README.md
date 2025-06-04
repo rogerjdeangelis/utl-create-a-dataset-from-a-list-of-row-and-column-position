@@ -4,13 +4,20 @@ Create a dataset from a list of row and column position
 
     %stop_submission;
 
+             SOLUTIONS
+
+                 1 r matrix
+                 2 r base
+                   Keintz, Mark
+                   mkeintz@outlook.com
+
     This is problem best done with a marix language
 
     Create a dataset from a list of row and column position
 
-    Op says data too large for IML. I have 128gb ram so I wonder what large means?
+    Op says data too large for IML. I have 128gb ram, so I wonder what large means?
 
-    Note, I think the op wantsthe output matrix to be 3 x 4 not 4 x 4.
+    Note, I think the op wants the output matrix to be 3 x 4 not 4 x 4.
     There is not fourth row?
 
     guthub
@@ -39,12 +46,13 @@ Create a dataset from a list of row and column position
     /* libname sd1 "d:/sd1";  |    }                               |                                                          */
     /* data sd1.have;         |                                    |                                                          */
     /* input r c;             |-----------------------------------------------------------------------------------------------*/
-    /* cards4;                |                                    |                                                          */
-    /* 1 1                    | proc datasets lib=sd1              | R                                                        */
-    /* 2 3                    | nolist nodetails;                  |      [,1] [,2] [,3] [,4]                                 */
-    /* 3 4                    |  delete want;                      | [1,]    1    0    0    0                                 */
-    /* ;;;;                   | run;quit;                          | [2,]    0    0    1    0                                 */
-    /* run;quit;              |                                    | [3,]    0    0    0    1                                 */
+    /* cards4;                |1 R MATRIX                          |                                                          */
+    /* 1 1                    |==========                          |                                                          */
+    /* 2 3                    | proc datasets lib=sd1              | R                                                        */
+    /* 3 4                    | nolist nodetails;                  |      [,1] [,2] [,3] [,4]                                 */
+    /* ;;;;                   |  delete want;                      | [1,]    1    0    0    0                                 */
+    /* run;quit;              | run;quit;                          | [2,]    0    0    1    0                                 */
+    /*                        |                                    | [3,]    0    0    0    1                                 */
     /*                        | %utl_rbeginx;                      |                                                          */
     /*                        | parmcards4;                        |                                                          */
     /*                        | library(haven)                     | SAS SD1.HAVE obs=3                                       */
@@ -72,16 +80,51 @@ Create a dataset from a list of row and column position
     /*                        | proc print                         |                                                          */
     /*                        |    data=sd1.want split='_';        |                                                          */
     /*                        | run;quit;                          |                                                          */
+    /*                        |                                    |                                                          */
+    /*----------------------------------------------------------------------------------------------------------------------- */
+    /*  data have;            | 2 BASE SAS                         |                                                          */
+    /*   input r c;           | ==========                         | ROW  COL1  COL2   COL3   COL4   COL5   COL6              */
+    /*  datalines;            |                                    |                                                          */
+    /*  1 1                   | proc sql noprint;                  |   1    1     0      0      0      0      0               */
+    /*  2 3                   |   select                           |   2    0     0      1      0      0      0               */
+    /*  3 4                   |      max(r)                        |   3    0     0      0      1      0      0               */
+    /*  8 2                   |     ,max(c)                        |   4    0     0      0      0      0      0               */
+    /*  8 6                   |   into                             |   5    0     0      0      0      0      0               */
+    /*  12 5                  |      :nrows                        |   6    0     0      0      0      0      0               */
+    /*  run;                  |     ,:ncols                        |   7    0     0      0      0      0      0               */
+    /*                        |   from                             |   8    0     1      0      0      0      1               */
+    /*                        |       have;                        |   9    0     0      0      0      0      0               */
+    /*                        | quit;                              |  10    0     0      0      0      0      0               */
+    /*                        |                                    |  11    0     0      0      0      0      0               */
+    /*                        | data zeroes / view=zeroes;         |  12    0     0      0      0      1      0               */
+    /*                        |   array col {&ncols} (&ncols*0);   |                                                          */
+    /*                        |   do row=1 to &nrows;              |                                                          */
+    /*                        |     output;                        |                                                          */
+    /*                        |   end;                             |                                                          */
+    /*                        | run;                               |                                                          */
+    /*                        |                                    |                                                          */
+    /*                        | data want (keep=row col:);         |                                                          */
+    /*                        |   update                           |                                                          */
+    /*                        |     zeroes                         |                                                          */
+    /*                        |     have (in=inh rename=(r=row));  |                                                          */
+    /*                        |   by row;                          |                                                          */
+    /*                        |   array col {&ncols} ;             |                                                          */
+    /*                        |   if inh=1 then col{c}=1;          |                                                          */
+    /*                        | run;                               |                                                          */
     /**************************************************************************************************************************/
 
-    /*                   _
+    /*                          _        _
+    / |  _ __   _ __ ___   __ _| |_ _ __(_)_  __
+    | | | `__| | `_ ` _ \ / _` | __| `__| \ \/ /
+    | | | |    | | | | | | (_| | |_| |  | |>  <
+    |_| |_|    |_| |_| |_|\__,_|\__|_|  |_/_/\_\
+     _                   _
     (_)_ __  _ __  _   _| |_
     | | `_ \| `_ \| | | | __|
     | | | | | |_) | |_| | |_
     |_|_| |_| .__/ \__,_|\__|
             |_|
     */
-
     options
      validvarname=upcase;
     libname sd1 "d:/sd1";
@@ -154,6 +197,84 @@ Create a dataset from a list of row and column position
     /* [3,]    0    0    0    1 |   0      0      0      1                                                                    */
     /**************************************************************************************************************************/
 
+    /*___           _
+    |___ \   _ __  | |__   __ _ ___  ___   ___  __ _ ___
+      __) | | `__| | `_ \ / _` / __|/ _ \ / __|/ _` / __|
+     / __/  | |    | |_) | (_| \__ \  __/ \__ \ (_| \__ \
+    |_____| |_|    |_.__/ \__,_|___/\___| |___/\__,_|___/
+     _                   _
+    (_)_ __  _ __  _   _| |_
+    | | `_ \| `_ \| | | | __|
+    | | | | | |_) | |_| | |_
+    |_|_| |_| .__/ \__,_|\__|
+            |_|
+
+    Mark Keintz
+
+    I think this problem is a good use case for data set views
+    (with all zeroes for COL vars) and the UPDATE statement:
+    The dataset with the R and C variables are just
+    "transactions" to be applied to the view:
+
+    */
+
+    data have;
+      input r c;
+    datalines;
+    1 1
+    2 3
+    3 4
+    8 2
+    8 6
+    12 5
+    run;
+
+    proc sql noprint;
+      select
+         max(r)
+        ,max(c)
+      into
+         :nrows
+        ,:ncols
+      from
+          have;
+    quit;
+
+    data zeroes / view=zeroes;
+      array col {&ncols} (&ncols*0);
+      do row=1 to &nrows;
+        output;
+      end;
+    run;
+
+    data want (keep=row col:);
+      update
+        zeroes
+        have (in=inh rename=(r=row));
+      by row;
+      array col {&ncols} ;
+      if inh=1 then col{c}=1;
+    run;
+
+    /**************************************************************************************************************************/
+    /*  WORK.WANT total obs=12                                                                                                */
+    /*                                                                                                                        */
+    /*   COL1    COL2    COL3    COL4    COL5    COL6    ROW                                                                  */
+    /*                                                                                                                        */
+    /*     1       0       0       0       0       0       1                                                                  */
+    /*     0       0       1       0       0       0       2                                                                  */
+    /*     0       0       0       1       0       0       3                                                                  */
+    /*     0       0       0       0       0       0       4                                                                  */
+    /*     0       0       0       0       0       0       5                                                                  */
+    /*     0       0       0       0       0       0       6                                                                  */
+    /*     0       0       0       0       0       0       7                                                                  */
+    /*     0       1       0       0       0       1       8                                                                  */
+    /*     0       0       0       0       0       0       9                                                                  */
+    /*     0       0       0       0       0       0      10                                                                  */
+    /*     0       0       0       0       0       0      11                                                                  */
+    /*     0       0       0       0       1       0      12                                                                  */
+    /**************************************************************************************************************************/
+
     /*              _
       ___ _ __   __| |
      / _ \ `_ \ / _` |
@@ -161,3 +282,4 @@ Create a dataset from a list of row and column position
      \___|_| |_|\__,_|
 
     */
+
